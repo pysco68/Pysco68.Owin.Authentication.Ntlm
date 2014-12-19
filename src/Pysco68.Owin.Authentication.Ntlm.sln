@@ -3,6 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pysco68.Owin.Authentication.Ntlm", "Pysco68.Owin.Authentication.Ntlm\Pysco68.Owin.Authentication.Ntlm.csproj", "{A4FC00D0-C098-4759-836B-6B6AAD7A8895}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pysco68.Owin.Authentication.Ntlm.Tests", "Pysco68.Owin.Authentication.Ntlm.Tests\Pysco68.Owin.Authentication.Ntlm.Tests.csproj", "{069BDBD9-9BED-4944-85BC-697E1B2DFA00}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{2B113C6C-7199-415D-83CC-DCCF40344BB6}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +20,10 @@ Global
 		{A4FC00D0-C098-4759-836B-6B6AAD7A8895}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4FC00D0-C098-4759-836B-6B6AAD7A8895}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A4FC00D0-C098-4759-836B-6B6AAD7A8895}.Release|Any CPU.Build.0 = Release|Any CPU
+		{069BDBD9-9BED-4944-85BC-697E1B2DFA00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{069BDBD9-9BED-4944-85BC-697E1B2DFA00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{069BDBD9-9BED-4944-85BC-697E1B2DFA00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{069BDBD9-9BED-4944-85BC-697E1B2DFA00}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
