@@ -1,9 +1,10 @@
 ﻿namespace Pysco68.Owin.Authentication.Ntlm
 {
-    using Microsoft.Owin.Logging;
-    using Microsoft.Owin.Security;
-    using Microsoft.Owin.Security.Infrastructure;
-    using System.Threading.Tasks;
+    using Microsoft.Owin.Infrastructure;
+using Microsoft.Owin.Logging;
+using Microsoft.Owin.Security;
+using Microsoft.Owin.Security.Infrastructure;
+using System.Threading.Tasks;
 
     class NtlmAuthenticationHandler : AuthenticationHandler<NtlmAuthenticationOptions>
     {
@@ -42,9 +43,24 @@
             // only act on unauthorized responses
             if (Response.StatusCode == 401)
             {
-                // TODO: check for authentication headers, 
-                // gather the authentication challenge from upper application layers
-                // and act accordingly!
+                var challenge = Helper.LookupChallenge(Options.AuthenticationType, Options.AuthenticationMode);
+
+                // this migth be our chance to request NTLM authentication!
+                if (challenge != null)
+                {
+                    var state = challenge.Properties;
+
+                    if (string.IsNullOrEmpty(state.RedirectUri))
+                    {
+                        state.RedirectUri = Request.Uri.ToString();
+                    }
+
+                    var stateString = Options.StateDataFormat.Protect(state);
+                    // TODO: add some cache to store a state in
+
+                    // redirect to trigger trigger NTLM authentication
+                    Response.Redirect(WebUtilities.AddQueryString(Options.CallbackPath.Value, "state", stateString));
+                }
             }
 
             return Task.Delay(0);
@@ -59,7 +75,15 @@
         {
             if (Options.CallbackPath.HasValue && Options.CallbackPath == Request.Path)
             {
-                // TODO: trigger the authentication and decide what to do depending on result!
+                var ticket = await AuthenticateAsync();
+                if (ticket != null && ticket.Identity != null)
+                {
+                    Context.Authentication.SignIn(ticket.Properties, ticket.Identity);
+                    Response.Redirect(ticket.Properties.RedirectUri);
+
+                    // Prevent further processing by the owin pipeline.
+                    return true;
+                }
             }
 
             // Let the rest of the pipeline run.
