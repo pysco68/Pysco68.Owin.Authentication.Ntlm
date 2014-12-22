@@ -1,10 +1,10 @@
 ﻿namespace Pysco68.Owin.Authentication.Ntlm
 {
     using Microsoft.Owin.Infrastructure;
-using Microsoft.Owin.Logging;
-using Microsoft.Owin.Security;
-using Microsoft.Owin.Security.Infrastructure;
-using System.Threading.Tasks;
+    using Microsoft.Owin.Logging;
+    using Microsoft.Owin.Security;
+    using Microsoft.Owin.Security.Infrastructure;
+    using System.Threading.Tasks;
 
     class NtlmAuthenticationHandler : AuthenticationHandler<NtlmAuthenticationOptions>
     {

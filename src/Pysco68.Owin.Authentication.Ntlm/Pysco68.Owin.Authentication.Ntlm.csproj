@@ -60,11 +60,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Native\Interop.cs" />
+    <Compile Include="Native\Structures.cs" />
     <Compile Include="NtlmAuthenticationMiddleware.cs" />
     <Compile Include="NtlmAuthenticationHandler.cs" />
     <Compile Include="NtlmAuthenticationExtensions.cs" />
     <Compile Include="NtlmAuthenticationOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Security\BufferWrapper.cs" />
+    <Compile Include="Security\Common.cs" />
+    <Compile Include="Security\LittleEndian.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
