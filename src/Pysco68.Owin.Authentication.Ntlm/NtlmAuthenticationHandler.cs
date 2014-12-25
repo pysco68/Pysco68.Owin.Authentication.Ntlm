@@ -4,6 +4,8 @@
     using Microsoft.Owin.Logging;
     using Microsoft.Owin.Security;
     using Microsoft.Owin.Security.Infrastructure;
+    using Pysco68.Owin.Authentication.Ntlm.Security;
+    using System;
     using System.Threading.Tasks;
 
     class NtlmAuthenticationHandler : AuthenticationHandler<NtlmAuthenticationOptions>
@@ -27,10 +29,48 @@
         {
             // DUMMY
             await Task.Delay(0);
-            return new AuthenticationTicket(null, null);
 
-            // TODO:
-            // implement the actual NTLM roundtrips in here!
+            // retrieve the state Id
+            var stateId = Request.Query["state"];
+
+            State state = null;
+
+            // first we do check if there's a state cached under the right ID
+            if (this.Options.LoginStateCache.TryGet(stateId, out state))
+            {
+                // okay, we shall authenticate! For that we must
+                // get the authorization header and extract the token
+                var authorizationHeader = Request.Headers["Authorization"];
+
+                byte[] token = null;
+                if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("NTLM "))
+                {
+                    token = Convert.FromBase64String(authorizationHeader.Substring(5)); ;
+                }
+
+                // First eight bytes are header containing NTLMSSP\0 signature
+                // Next byte contains type of the message recieved.
+                // No Token - it's the initial request. Add a authenticate header
+                // Message Type 1 — is initial client's response to server's 401 Unauthorized error.
+                // Message Type 2 — is the server's response to it. Contains random 8 bytes challenge.
+                // Message Type 3 — is encrypted password hashes from client ready to server validation.
+                if (token == null)
+                {
+                    // TODO: add WWW-Authenticate / NTLM header
+                }
+                else if (token != null && token[8] == 1)
+                {
+                    // Message of type 1 was received
+                    // TODO: try to acquire server challenge and send back to client 
+                }
+                else if (token != null && token[8] == 3)
+                {
+                    // message of type 3 was received
+                    // TODO: validate ticket and create a session
+                }
+            }
+
+            return new AuthenticationTicket(null, null);
         }
 
         /// <summary>
@@ -55,7 +95,7 @@
                     }
 
                     var stateString = Options.StateDataFormat.Protect(state);
-                    // TODO: add some cache to store a state in
+                    Options.LoginStateCache.Add(stateString, new State());
 
                     // redirect to trigger trigger NTLM authentication
                     Response.Redirect(WebUtilities.AddQueryString(Options.CallbackPath.Value, "state", stateString));
