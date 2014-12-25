@@ -6,6 +6,7 @@
     using Microsoft.Owin.Security.Infrastructure;
     using Pysco68.Owin.Authentication.Ntlm.Security;
     using System;
+    using System.Security.Claims;
     using System.Threading.Tasks;
 
     class NtlmAuthenticationHandler : AuthenticationHandler<NtlmAuthenticationOptions>
@@ -27,8 +28,8 @@
         /// <returns></returns>
         protected override async Task<AuthenticationTicket> AuthenticateCoreAsync()
         {
-            // DUMMY
             await Task.Delay(0);
+            AuthenticationProperties properties = null;
 
             // retrieve the state Id
             var stateId = Request.Query["state"];
@@ -54,23 +55,38 @@
                 // Message Type 1 — is initial client's response to server's 401 Unauthorized error.
                 // Message Type 2 — is the server's response to it. Contains random 8 bytes challenge.
                 // Message Type 3 — is encrypted password hashes from client ready to server validation.
-                if (token == null)
-                {
-                    // TODO: add WWW-Authenticate / NTLM header
-                }
-                else if (token != null && token[8] == 1)
+                if (token != null && token[8] == 1)
                 {
                     // Message of type 1 was received
-                    // TODO: try to acquire server challenge and send back to client 
+                    if (state.TryAcquireServerChallenge(ref token))
+                    {
+                        // send the type 2 message
+                        var authorization = Convert.ToBase64String(token);
+                        Response.Headers.Add("WWW-Authenticate", new[] { string.Concat("NTLM ", authorization) });
+                        Response.StatusCode = 401;
+
+                        // not sucessfull
+                        return new AuthenticationTicket(null, properties);
+                    }
                 }
                 else if (token != null && token[8] == 3)
                 {
                     // message of type 3 was received
-                    // TODO: validate ticket and create a session
+                    if (state.IsClientResponseValid(token))
+                    {
+                        // Authorization successful 
+                        properties = Options.StateDataFormat.Unprotect(stateId);
+
+                        throw new NotImplementedException();
+                    }
                 }
+
+                // Re-set the authentication headers because authentication failed!
+                Response.Headers.Add("WWW-Authenticate", new[] { "NTLM" });
+                Response.StatusCode = 401;
             }
 
-            return new AuthenticationTicket(null, null);
+            return new AuthenticationTicket(null, properties);
         }
 
         /// <summary>
