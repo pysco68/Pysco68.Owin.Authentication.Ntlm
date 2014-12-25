@@ -19,7 +19,6 @@
             this.logger = logger;
         }
 
-
         /// <summary>
         /// Authenticate the request
         /// </summary>
