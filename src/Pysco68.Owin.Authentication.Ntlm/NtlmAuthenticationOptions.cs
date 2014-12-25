@@ -7,6 +7,7 @@
     using System.Threading.Tasks;
     using Microsoft.Owin;
     using Microsoft.Owin.Security;
+    using Pysco68.Owin.Authentication.Ntlm.Security;
 
     public class NtlmAuthenticationOptions : AuthenticationOptions
     {
@@ -15,7 +16,21 @@
         /// Secured store for state data
         /// </summary>
         internal ISecureDataFormat<AuthenticationProperties> StateDataFormat { get; set; }
+        
+        /// <summary>
+        /// Store states for the login attempts
+        /// </summary>
+        internal StateCache LoginStateCache { get; set; }
         #endregion
+
+        /// <summary>
+        /// Number of minutes a login can take (defaults to 2 minutes)
+        /// </summary>
+        public int LoginStateExpirationTime
+        {
+            set { LoginStateCache.ExpirationTime = value; }
+            get { return LoginStateCache.ExpirationTime; }
+        }
 
         /// <summary>
         /// The authentication type used for sign in
@@ -36,6 +51,8 @@
         {
             this.AuthenticationMode = Microsoft.Owin.Security.AuthenticationMode.Passive;
             this.CallbackPath = new PathString("/authentication/ntlm-signin");
+            this.LoginStateCache = new StateCache("NtlmAuthenticationStateCache");
+            this.LoginStateExpirationTime = 2;
         }
     }
 
