@@ -56,15 +56,7 @@
                 // Message Type 1 — is initial client's response to server's 401 Unauthorized error.
                 // Message Type 2 — is the server's response to it. Contains random 8 bytes challenge.
                 // Message Type 3 — is encrypted password hashes from client ready to server validation.
-                if (token == null)
-                {
-                    Response.Headers.Add("WWW-Authenticate", new[] { "NTLM" });
-                    Response.StatusCode = 401;
-
-                    // not sucessfull
-                    return new AuthenticationTicket(null, properties);
-                }   
-                else if (token != null && token[8] == 1)
+                if (token != null && token[8] == 1)
                 {
                     // Message of type 1 was received
                     if (state.TryAcquireServerChallenge(ref token))
@@ -86,20 +78,35 @@
                         // Authorization successful 
                         properties = state.AuthenticationProperties;
 
+                        // If the name is something like DOMAIN\username then
+                        // grab the name part
+                        var parts = state.WindowsIdentity.Name.Split(new[] { '\\' }, 2);
+                        string shortName = parts.Length == 1 ? parts[0] : parts[parts.Length - 1];
+
+                        // we need to create a new identity using the sign in type that 
+                        // the cookie authentication is listening for
                         var identity = new ClaimsIdentity(Options.SignInAsAuthenticationType);
 
                         identity.AddClaims(new[] 
                         {
-                            new Claim(ClaimTypes.NameIdentifier, "username", null, Options.AuthenticationType),                                    
+                            new Claim(ClaimTypes.NameIdentifier, state.WindowsIdentity.User.Value, null, Options.AuthenticationType),                                    
+                            new Claim(ClaimTypes.Name, shortName),
+                            new Claim(ClaimTypes.Sid, state.WindowsIdentity.User.Value),                              
                             new Claim(ClaimTypes.AuthenticationMethod, NtlmAuthenticationDefaults.AuthenticationType)
                         });
+
+                        // TODO: remove the token from cache
 
                         // create the authentication ticket
                         return new AuthenticationTicket(identity, properties);
                     }
                 }
 
-                // Re-set the authentication headers because authentication failed!
+                // This code runs under following conditions:
+                // - authentication failed (in either step: IsClientResponseValid() or TryAcquireServerChallenge())
+                // - there's no token in the headers
+                //
+                // This means we've got to set the WWW-Authenticate header and return a 401
                 Response.Headers.Add("WWW-Authenticate", new[] { "NTLM" });
                 Response.StatusCode = 401;
             }
@@ -114,7 +121,7 @@
         protected override Task ApplyResponseChallengeAsync()
         {
             // only act on unauthorized responses
-            if (Response.StatusCode == 401)
+            if (Response.StatusCode == 401 && Response.Headers.ContainsKey("WWW-Authenticate") == false)
             {
                 var challenge = Helper.LookupChallenge(Options.AuthenticationType, Options.AuthenticationMode);
 
@@ -125,16 +132,20 @@
 
                     if (string.IsNullOrEmpty(authProperties.RedirectUri))
                     {
-                        authProperties.RedirectUri = Request.Uri.ToString();
+                        throw new ArgumentException("The authentication challenge's redirect URI can't be empty!");
                     }
 
-                    var stateHash = CalculateMD5Hash(Options.StateDataFormat.Protect(authProperties));
+                    // get a fairly "unique" string to use in the redirection URL
+                    var protectedProperties = Options.StateDataFormat.Protect(authProperties);
+                    var stateHash = CalculateMD5Hash(protectedProperties);
 
+                    // create a new handshake state
                     var state = new State()
                     {
                         AuthenticationProperties = authProperties
                     };
 
+                    // and store it in the state cache
                     Options.LoginStateCache.Add(stateHash, state);
 
                     // redirect to trigger trigger NTLM authentication
