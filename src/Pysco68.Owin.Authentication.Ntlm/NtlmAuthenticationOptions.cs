@@ -11,6 +11,8 @@
 
     public class NtlmAuthenticationOptions : AuthenticationOptions
     {
+        public static readonly PathString DefaultRedirectPath = new PathString("/authentication/ntlm-signin");
+
         #region Internal fields
         /// <summary>
         /// Secured store for state data
@@ -50,7 +52,7 @@
             : base(NtlmAuthenticationDefaults.AuthenticationType)
         {
             this.AuthenticationMode = Microsoft.Owin.Security.AuthenticationMode.Passive;
-            this.CallbackPath = new PathString("/authentication/ntlm-signin");
+            this.CallbackPath = NtlmAuthenticationOptions.DefaultRedirectPath;
             this.LoginStateCache = new StateCache("NtlmAuthenticationStateCache");
             this.LoginStateExpirationTime = 2;
         }

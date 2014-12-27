@@ -13,11 +13,23 @@ namespace Pysco68.Owin.Authentication.Ntlm.Tests
             // use default sign in with application cookies
             app.SetDefaultSignInAsAuthenticationType("ApplicationCookie");
 
+
+
             app.UseCookieAuthentication(new CookieAuthenticationOptions()
             {
                 AuthenticationType = "ApplicationCookie",
                 LoginPath = new PathString("/api/account/ntlmlogin"),
-                ReturnUrlParameter = "redirectUrl"
+                ReturnUrlParameter = "redirectUrl",
+                Provider = new CookieAuthenticationProvider()
+                {
+                    OnApplyRedirect = ctx =>
+                    {
+                        if (!ctx.Request.IsNtlmAuthenticationCallback())
+                        {
+                            ctx.Response.Redirect(ctx.RedirectUri);
+                        }
+                    }
+                }
             });
 
             // Enable NTLM authentication
@@ -70,7 +82,7 @@ namespace Pysco68.Owin.Authentication.Ntlm.Tests
 
                 var context = this.Request.GetContext();
                 context.Authentication.Challenge(ap, NtlmAuthenticationDefaults.AuthenticationType);
-                return StatusCode(System.Net.HttpStatusCode.Unauthorized);
+                return Unauthorized();
             }
 
             return Redirect(redirectUrl);
