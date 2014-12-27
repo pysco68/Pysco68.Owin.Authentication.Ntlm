@@ -2,6 +2,8 @@
 {
     using System;
     using Pysco68.Owin.Authentication.Ntlm.Native;
+    using System.Runtime.InteropServices;
+    using Microsoft.Owin.Security;
 
     /// <summary>
     /// A windows authentication session
@@ -24,6 +26,7 @@
         /// </summary>
         private SecurityHandle Context;
 
+        public AuthenticationProperties AuthenticationProperties;
 
         /// <summary>
         /// Try to acquire the server challenge for this state
@@ -93,7 +96,40 @@
         /// <returns></returns>
         public bool IsClientResponseValid(byte[] message)
         {
-            throw new NotImplementedException();
+            SecurityBufferDesciption clientToken = new SecurityBufferDesciption(message);
+            SecurityBufferDesciption serverToken = new SecurityBufferDesciption(Common.MaximumTokenSize);
+
+            try
+            {
+                int result;
+                uint contextAttributes;
+                var lifetime = new SecurityInteger(0);
+
+                result = Interop.AcceptSecurityContext(
+                    ref this.Credentials,                       // [in] handle to the credentials
+                    ref this.Context,                           // [in/out] handle of partially formed context.  Always NULL the first time through
+                    ref clientToken,                            // [in] pointer to the input buffers
+                    Common.StandardContextAttributes,           // [in] required context attributes
+                    Common.SecurityNativeDataRepresentation,    // [in] data representation on the target
+                    out this.Context,                           // [in/out] receives the new context handle    
+                    out serverToken,                            // [in/out] pointer to the output buffers
+                    out contextAttributes,                      // [out] receives the context attributes        
+                    out lifetime);                              // [out] receives the life span of the security context
+
+                if (result != Common.SuccessfulResult)
+                {
+                    return false;
+                }                
+            }
+            finally
+            {
+                clientToken.Dispose();
+                serverToken.Dispose();
+                this.Credentials.Reset();
+                this.Context.Reset();
+            }
+
+            return true;
         }
     }
 }

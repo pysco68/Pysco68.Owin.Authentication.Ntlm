@@ -7,6 +7,7 @@
     using Pysco68.Owin.Authentication.Ntlm.Security;
     using System;
     using System.Security.Claims;
+    using System.Text;
     using System.Threading.Tasks;
 
     class NtlmAuthenticationHandler : AuthenticationHandler<NtlmAuthenticationOptions>
@@ -55,7 +56,15 @@
                 // Message Type 1 — is initial client's response to server's 401 Unauthorized error.
                 // Message Type 2 — is the server's response to it. Contains random 8 bytes challenge.
                 // Message Type 3 — is encrypted password hashes from client ready to server validation.
-                if (token != null && token[8] == 1)
+                if (token == null)
+                {
+                    Response.Headers.Add("WWW-Authenticate", new[] { "NTLM" });
+                    Response.StatusCode = 401;
+
+                    // not sucessfull
+                    return new AuthenticationTicket(null, properties);
+                }   
+                else if (token != null && token[8] == 1)
                 {
                     // Message of type 1 was received
                     if (state.TryAcquireServerChallenge(ref token))
@@ -75,9 +84,18 @@
                     if (state.IsClientResponseValid(token))
                     {
                         // Authorization successful 
-                        properties = Options.StateDataFormat.Unprotect(stateId);
+                        properties = state.AuthenticationProperties;
 
-                        throw new NotImplementedException();
+                        var identity = new ClaimsIdentity(Options.SignInAsAuthenticationType);
+
+                        identity.AddClaims(new[] 
+                        {
+                            new Claim(ClaimTypes.NameIdentifier, "username", null, Options.AuthenticationType),                                    
+                            new Claim(ClaimTypes.AuthenticationMethod, NtlmAuthenticationDefaults.AuthenticationType)
+                        });
+
+                        // create the authentication ticket
+                        return new AuthenticationTicket(identity, properties);
                     }
                 }
 
@@ -103,18 +121,24 @@
                 // this migth be our chance to request NTLM authentication!
                 if (challenge != null)
                 {
-                    var state = challenge.Properties;
+                    var authProperties = challenge.Properties;
 
-                    if (string.IsNullOrEmpty(state.RedirectUri))
+                    if (string.IsNullOrEmpty(authProperties.RedirectUri))
                     {
-                        state.RedirectUri = Request.Uri.ToString();
+                        authProperties.RedirectUri = Request.Uri.ToString();
                     }
 
-                    var stateString = Options.StateDataFormat.Protect(state);
-                    Options.LoginStateCache.Add(stateString, new State());
+                    var stateHash = CalculateMD5Hash(Options.StateDataFormat.Protect(authProperties));
+
+                    var state = new State()
+                    {
+                        AuthenticationProperties = authProperties
+                    };
+
+                    Options.LoginStateCache.Add(stateHash, state);
 
                     // redirect to trigger trigger NTLM authentication
-                    Response.Redirect(WebUtilities.AddQueryString(Options.CallbackPath.Value, "state", stateString));
+                    Response.Redirect(WebUtilities.AddQueryString(Options.CallbackPath.Value, "state", stateHash));
                 }
             }
 
@@ -139,10 +163,32 @@
                     // Prevent further processing by the owin pipeline.
                     return true;
                 }
+                else if (Response.Headers.ContainsKey("WWW-Authenticate"))
+                {
+                    return true;
+                }
             }
 
             // Let the rest of the pipeline run.
             return false;
         }
+
+        #region Helpers
+        public string CalculateMD5Hash(string input)
+        {
+            // step 1, calculate MD5 hash from input
+            var md5 = System.Security.Cryptography.MD5.Create();
+            byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
+            byte[] hash = md5.ComputeHash(inputBytes);
+
+            // step 2, convert byte array to hex string
+            var sb = new StringBuilder();
+            for (int i = 0; i < hash.Length; i++)
+            {
+                sb.Append(hash[i].ToString("X2"));
+            }
+            return sb.ToString();
+        }
+        #endregion
     }
 }
