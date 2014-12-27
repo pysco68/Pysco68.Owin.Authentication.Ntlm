@@ -37,7 +37,7 @@ namespace Pysco68.Owin.Authentication.Ntlm.Tests
 
         [Test]
         public async void LogInSuccessfully()
-        {            
+        {
             var handler = new HttpClientHandler 
             { 
                 AllowAutoRedirect = true, 
@@ -71,10 +71,8 @@ namespace Pysco68.Owin.Authentication.Ntlm.Tests
             var response = await client.GetAsync("/api/test");
             var result = await response.Content.ReadAsAsync<string>();
 
-            var currentUserName = Environment.UserName;
-
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode, "Http status");
-            Assert.AreEqual(currentUserName, result, "Username");
+            Assert.IsNullOrEmpty(result, "Username should have been null");
         }
     }
 }
