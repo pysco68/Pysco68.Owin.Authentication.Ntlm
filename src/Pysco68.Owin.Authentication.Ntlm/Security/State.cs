@@ -4,6 +4,7 @@
     using Pysco68.Owin.Authentication.Ntlm.Native;
     using System.Runtime.InteropServices;
     using Microsoft.Owin.Security;
+    using System.Security.Principal;
 
     /// <summary>
     /// A windows authentication session
@@ -26,7 +27,15 @@
         /// </summary>
         private SecurityHandle Context;
 
+        /// <summary>
+        /// TODO: comment this!
+        /// </summary>
         public AuthenticationProperties AuthenticationProperties;
+
+        /// <summary>
+        /// The matching windows identity
+        /// </summary>
+        public WindowsIdentity WindowsIdentity { get; set; }
 
         /// <summary>
         /// Try to acquire the server challenge for this state
@@ -98,6 +107,7 @@
         {
             SecurityBufferDesciption clientToken = new SecurityBufferDesciption(message);
             SecurityBufferDesciption serverToken = new SecurityBufferDesciption(Common.MaximumTokenSize);
+            IntPtr securityContextHandle = IntPtr.Zero;
 
             try
             {
@@ -119,12 +129,30 @@
                 if (result != Common.SuccessfulResult)
                 {
                     return false;
-                }                
+                }
+                                
+                if (Interop.QuerySecurityContextToken(ref this.Context, ref securityContextHandle) != 0)
+                {
+                    return false;
+                }
+
+                var identity = new WindowsIdentity(securityContextHandle);
+
+                if (identity == null)
+                {
+                    return false;
+                }
+
+                this.WindowsIdentity = identity;
+
             }
             finally
             {
                 clientToken.Dispose();
                 serverToken.Dispose();
+
+                Interop.CloseHandle(securityContextHandle);
+
                 this.Credentials.Reset();
                 this.Context.Reset();
             }

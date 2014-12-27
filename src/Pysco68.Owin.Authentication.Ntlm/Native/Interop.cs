@@ -58,5 +58,12 @@
             ref SecurityHandle phContext,
             ref IntPtr phToken);
 
+        /// <summary>
+        /// Close handle for proper cleanup
+        /// </summary>
+        /// <param name="hObject"></param>
+        /// <returns></returns>
+        [DllImport("kernel32.dll")]
+        public static extern int CloseHandle(IntPtr hObject);
     }
 }
