@@ -9,9 +9,9 @@
     /// <summary>
     /// A windows authentication session
     /// </summary>
-    class State
+    class HandshakeState
     {
-        public State()
+        public HandshakeState()
         {
             this.Credentials = new SecurityHandle(0);
             this.Context = new SecurityHandle(0);
@@ -28,7 +28,8 @@
         private SecurityHandle Context;
 
         /// <summary>
-        /// TODO: comment this!
+        /// The authentication properties we extract from the authentication challenge
+        /// received from application layer
         /// </summary>
         public AuthenticationProperties AuthenticationProperties;
 

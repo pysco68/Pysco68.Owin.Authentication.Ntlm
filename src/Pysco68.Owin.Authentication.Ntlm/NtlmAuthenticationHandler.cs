@@ -29,16 +29,15 @@
         /// <returns></returns>
         protected override async Task<AuthenticationTicket> AuthenticateCoreAsync()
         {
-            await Task.Delay(0);
-            AuthenticationProperties properties = null;
+            // note: this is cheating for async...
+            AuthenticationProperties properties = await Task.FromResult<AuthenticationProperties>(null);
+            HandshakeState state = null;
 
             // retrieve the state Id
             var stateId = Request.Query["state"];
+           
 
-            State state = null;
-
-            // first we do check if there's a state cached under the right ID
-            if (this.Options.LoginStateCache.TryGet(stateId, out state))
+            if (stateId != null && this.Options.LoginStateCache.TryGet(stateId, out state))
             {
                 // okay, we shall authenticate! For that we must
                 // get the authorization header and extract the token
@@ -95,7 +94,8 @@
                             new Claim(ClaimTypes.AuthenticationMethod, NtlmAuthenticationDefaults.AuthenticationType)
                         });
 
-                        // TODO: remove the token from cache
+                        // We don't need that state anymore
+                        Options.LoginStateCache.TryRemove(stateId);
 
                         // create the authentication ticket
                         return new AuthenticationTicket(identity, properties);
@@ -140,7 +140,7 @@
                     var stateHash = CalculateMD5Hash(protectedProperties);
 
                     // create a new handshake state
-                    var state = new State()
+                    var state = new HandshakeState()
                     {
                         AuthenticationProperties = authProperties
                     };
@@ -180,7 +180,7 @@
                 }
             }
 
-            // Let the rest of the pipeline run.
+            // Let the rest of the pipeline run
             return false;
         }
 

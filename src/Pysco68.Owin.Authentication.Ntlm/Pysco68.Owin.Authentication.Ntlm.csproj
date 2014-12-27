@@ -62,7 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\StateCache.cs" />
-    <Compile Include="Security\State.cs" />
+    <Compile Include="Security\HandshakeState.cs" />
     <Compile Include="Native\Interop.cs" />
     <Compile Include="Native\Structures.cs" />
     <Compile Include="NtlmAuthenticationMiddleware.cs" />

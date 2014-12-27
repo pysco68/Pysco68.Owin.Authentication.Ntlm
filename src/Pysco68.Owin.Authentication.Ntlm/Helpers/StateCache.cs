@@ -38,19 +38,19 @@
         /// <param name="key"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public bool TryGet(string key, out State state)
+        public bool TryGet(string key, out HandshakeState state)
         {
             if (Cache.Contains(key))
             {
                 object tmp = Cache[key];
                 if (tmp != null)
                 {
-                    state = (State)tmp;
+                    state = (HandshakeState)tmp;
                     return true;
                 }
             }
 
-            state = default(State);
+            state = default(HandshakeState);
             return false;
         }
 
@@ -59,7 +59,7 @@
         /// </summary>
         /// <param name="key"></param>
         /// <param name="state"></param>
-        public void Add(string key, State state)
+        public void Add(string key, HandshakeState state)
         {
             this.Cache.Set(key, state, GetCacheItemPolicy(this.ExpirationTime));
         }
@@ -70,7 +70,7 @@
         /// <param name="key"></param>
         /// <param name="state"></param>
         /// <param name="policy"></param>
-        public void Add(string key, State state, CacheItemPolicy policy)
+        public void Add(string key, HandshakeState state, CacheItemPolicy policy)
         {
             this.Cache.Set(key, state, policy);
         }

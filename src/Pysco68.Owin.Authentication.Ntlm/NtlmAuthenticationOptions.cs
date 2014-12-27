@@ -11,6 +11,10 @@
 
     public class NtlmAuthenticationOptions : AuthenticationOptions
     {
+        /// <summary>
+        /// The default redirection path used by the NTLM authentication middleware of
+        /// the full roundtrip / handshakes
+        /// </summary>
         public static readonly PathString DefaultRedirectPath = new PathString("/authentication/ntlm-signin");
 
         #region Internal fields
