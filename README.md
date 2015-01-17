@@ -1,8 +1,6 @@
 # Pysco68.Owin.Authentication.NTLM
 
-A passive NTLM autentication middleware for OWIN. This middleware enables you to use NTLM authentication 
-independently of IIS or HTTPListener. Additionally, being a passive middleware, it will enable you to use 
-local application accounts with Windows Authentication as yet anoter mean of authentication!
+A passive NTLM autentication middleware for OWIN. This middleware enables you to use NTLM authentication independently of IIS or HTTPListener. Additionally it integrates easily with ASP.NET Identity 2.0. Being a passive middleware, it will enable you to use local application accounts with Windows Authentication as yet anoter mean of authentication!
 
 ## Usage
 
@@ -35,6 +33,34 @@ public class Startup
 }
 ```
 
+As with any other passive middleware you must provide some point of entry in your application that will start the authentication. As an example you could add a route like this one to your `Accounts` controller:
+
+```C#
+[AllowAnonymous]
+[Route("ntlmlogin")]
+[HttpGet]
+public IHttpActionResult Ntlmlogin(string redirectUrl)
+{
+    // create a login challenge if there's no user logged in!
+    if (this.User == null)
+    {
+        var ap = new AuthenticationProperties()
+        {
+            RedirectUri = redirectUrl
+        };
+
+        var context = this.Request.GetContext();
+        context.Authentication.Challenge(ap, NtlmAuthenticationDefaults.AuthenticationType);
+        return Unauthorized();
+    }
+
+    return Redirect(redirectUrl);
+}
+```
+
+> Note: That route/action would be the place to sign in with (or to create) a local application account too.
+
+
 Please note that beause of the slightly unusual way NTLM works (from OWIN perspective) you have to take care
 that the CookieAuthentication middleware isn't applying redirects when this middleware returns a 401 during the
 first two steps of authentication.
@@ -61,7 +87,7 @@ So make sure to check the above if you get strange redirects or redirect loops!
 
 ## Kudos
 
-Big thanks to Nancy.Authentication.Ntlm (https://github.com/toolchain/Nancy.Authentication.Ntlm) for their implementation of Ntlm for Nancy. 
+Big thanks to Alexey Shytikov (@shytikov) and his Nancy.Authentication.Ntlm (https://github.com/toolchain/Nancy.Authentication.Ntlm) implementation of Ntlm for Nancy. 
 It was a huge help!
 
 ## Help / Contribution
