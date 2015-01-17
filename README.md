@@ -2,6 +2,14 @@
 
 A passive NTLM autentication middleware for OWIN. This middleware enables you to use NTLM authentication independently of IIS or HTTPListener. Additionally it integrates easily with ASP.NET Identity 2.0. Being a passive middleware, it will enable you to use local application accounts with Windows Authentication as yet anoter mean of authentication!
 
+## Installation
+
+You can either clone this repository and include the project in your sources or install the nuget package using:
+
+```
+Install-Package Pysco68.Owin.Authentication.Ntlm 
+```
+
 ## Usage
 
 After installing the package as a dependency in your project you can
