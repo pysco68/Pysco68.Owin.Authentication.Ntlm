@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+    <metadata>
+        <id>Pysco68.Owin.Authentication.Ntlm</id>
+        <version>1.0.0</version>
+        <authors>Yannic "Pysco68" Staudt</authors>
+        <owners>Pysco68</owners>
+        <licenseUrl>https://github.com/pysco68/Pysco68.Owin.Authentication.Ntlm/raw/master/LICENCE</licenseUrl>
+        <projectUrl>https://github.com/pysco68/Pysco68.Owin.Authentication.Ntlm</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>An NTLM authentication middleware for OWIN that enables you to use NTLM (Windows) Authentication independently of IIS or HTTPListener.
+
+Furthermore it integrates with ASP.NET Identity 2.0 and allows you to have NTLM as yet another mean of authentication toghether with true local application accounts!</description>
+        <copyright>2014 Yannic Staudt</copyright>
+        <tags>NTLM OWIN Identity Windows authentication ASP.NET</tags>
+        <dependencies>
+            <group targetFramework=".NETFramework4.5">
+                <dependency id="Microsoft.Owin" version="3.0.0" />
+                <dependency id="Microsoft.Owin.Security" version="3.0.0" />
+                <dependency id="Owin" version="1.0" />
+                <dependency id="Owin.Extensions" version="0.8.5" />
+                <dependency id="Owin.Types" version="0.8.5" />
+            </group>
+        </dependencies>
+    </metadata>
+    <files>
+      <file src="bin\Release\Pysco68.Owin.Authentication.Ntlm.dll" target="lib\net45\Pysco68.Owin.Authentication.Ntlm.dll" />
+      <file src="bin\Release\Pysco68.Owin.Authentication.Ntlm.pdb" target="lib\net45\Pysco68.Owin.Authentication.Ntlm.pdb" />
+    </files>
+</package>

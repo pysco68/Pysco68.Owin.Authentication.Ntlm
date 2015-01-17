@@ -13,8 +13,7 @@ namespace Pysco68.Owin.Authentication.Ntlm.Tests
             // use default sign in with application cookies
             app.SetDefaultSignInAsAuthenticationType("ApplicationCookie");
 
-
-
+            // set up the cookie aut
             app.UseCookieAuthentication(new CookieAuthenticationOptions()
             {
                 AuthenticationType = "ApplicationCookie",
