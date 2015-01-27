@@ -51,7 +51,7 @@ namespace Pysco68.Owin.Authentication.Ntlm
             this IOwinRequest request, 
             PathString redirectPath)
         {
-            return (request.Path == redirectPath);
+            return (request.PathBase.Add(request.Path) == redirectPath);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿namespace Pysco68.Owin.Authentication.Ntlm
 {
+    using Microsoft.Owin;
     using Microsoft.Owin.Infrastructure;
     using Microsoft.Owin.Logging;
     using Microsoft.Owin.Security;
@@ -163,7 +164,7 @@
         /// <returns></returns>
         public override async Task<bool> InvokeAsync()
         {
-            if (Options.CallbackPath.HasValue && Options.CallbackPath == Request.Path)
+            if (Options.CallbackPath.HasValue && Options.CallbackPath == Request.PathBase.Add(Request.Path))
             {
                 var ticket = await AuthenticateAsync();
                 if (ticket != null && ticket.Identity != null)
