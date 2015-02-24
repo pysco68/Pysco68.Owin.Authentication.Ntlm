@@ -62,7 +62,7 @@ namespace Pysco68.Owin.Authentication.Ntlm.Tests
         {
             var handler = new HttpClientHandler
             {
-                AllowAutoRedirect = true
+                AllowAutoRedirect = true,
             };
 
             var client = new HttpClient(handler);
@@ -73,6 +73,33 @@ namespace Pysco68.Owin.Authentication.Ntlm.Tests
 
             Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode, "Http status");
             Assert.IsNullOrEmpty(result, "Username should have been null");
+        }
+
+
+        [Test]
+        public async void LogInFailBecauseOfFilter()
+        {
+            var handler = new HttpClientHandler
+            {
+                AllowAutoRedirect = true,
+                Credentials = CredentialCache.DefaultNetworkCredentials
+            };
+            WebApplication.Options.Filter = (identity, request) => false;
+            try
+            {
+                var client = new HttpClient(handler);
+                client.BaseAddress = this.BaseAddress;
+
+                var response = await client.GetAsync("/api/test");
+                var result = await response.Content.ReadAsAsync<string>();
+
+                Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode, "Http status");
+                Assert.IsNullOrEmpty(result, "Username should have been null");
+            }
+            finally
+            {
+                WebApplication.Options.Filter = null;
+            }
         }
     }
 }

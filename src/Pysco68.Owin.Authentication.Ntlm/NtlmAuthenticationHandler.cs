@@ -1,4 +1,5 @@
-﻿namespace Pysco68.Owin.Authentication.Ntlm
+﻿
+namespace Pysco68.Owin.Authentication.Ntlm
 {
     using Microsoft.Owin;
     using Microsoft.Owin.Infrastructure;
@@ -10,6 +11,7 @@
     using System.Security.Claims;
     using System.Text;
     using System.Threading.Tasks;
+    using System.Security.Cryptography;
 
     class NtlmAuthenticationHandler : AuthenticationHandler<NtlmAuthenticationOptions>
     {
@@ -36,7 +38,7 @@
 
             // retrieve the state Id
             var stateId = Request.Query["state"];
-           
+
 
             if (stateId != null && this.Options.LoginStateCache.TryGet(stateId, out state))
             {
@@ -47,7 +49,7 @@
                 byte[] token = null;
                 if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("NTLM "))
                 {
-                    token = Convert.FromBase64String(authorizationHeader.Substring(5)); ;
+                    token = Convert.FromBase64String(authorizationHeader.Substring(5));
                 }
 
                 // First eight bytes are header containing NTLMSSP\0 signature
@@ -63,7 +65,7 @@
                     {
                         // send the type 2 message
                         var authorization = Convert.ToBase64String(token);
-                        Response.Headers.Add("WWW-Authenticate", new[] { string.Concat("NTLM ", authorization) });
+                        Response.Headers.Add("WWW-Authenticate", new[] {string.Concat("NTLM ", authorization)});
                         Response.StatusCode = 401;
 
                         // not sucessfull
@@ -78,28 +80,31 @@
                         // Authorization successful 
                         properties = state.AuthenticationProperties;
 
-                        // If the name is something like DOMAIN\username then
-                        // grab the name part
-                        var parts = state.WindowsIdentity.Name.Split(new[] { '\\' }, 2);
-                        string shortName = parts.Length == 1 ? parts[0] : parts[parts.Length - 1];
-
-                        // we need to create a new identity using the sign in type that 
-                        // the cookie authentication is listening for
-                        var identity = new ClaimsIdentity(Options.SignInAsAuthenticationType);
-
-                        identity.AddClaims(new[] 
+                        if (Options.Filter == null || Options.Filter.Invoke(state.WindowsIdentity, Request))
                         {
-                            new Claim(ClaimTypes.NameIdentifier, state.WindowsIdentity.User.Value, null, Options.AuthenticationType),                                    
-                            new Claim(ClaimTypes.Name, shortName),
-                            new Claim(ClaimTypes.Sid, state.WindowsIdentity.User.Value),                              
-                            new Claim(ClaimTypes.AuthenticationMethod, NtlmAuthenticationDefaults.AuthenticationType)
-                        });
+                            // If the name is something like DOMAIN\username then
+                            // grab the name part (and what if it looks like username@domain?)
+                            var parts = state.WindowsIdentity.Name.Split(new[] {'\\'}, 2);
+                            string shortName = parts.Length == 1 ? parts[0] : parts[parts.Length - 1];
 
-                        // We don't need that state anymore
-                        Options.LoginStateCache.TryRemove(stateId);
+                            // we need to create a new identity using the sign in type that 
+                            // the cookie authentication is listening for
+                            var identity = new ClaimsIdentity(Options.SignInAsAuthenticationType);
 
-                        // create the authentication ticket
-                        return new AuthenticationTicket(identity, properties);
+                            identity.AddClaims(new[]
+                            {
+                                new Claim(ClaimTypes.NameIdentifier, state.WindowsIdentity.User.Value, null, Options.AuthenticationType),
+                                new Claim(ClaimTypes.Name, shortName),
+                                new Claim(ClaimTypes.Sid, state.WindowsIdentity.User.Value),
+                                new Claim(ClaimTypes.AuthenticationMethod, NtlmAuthenticationDefaults.AuthenticationType)
+                            });
+
+                            // We don't need that state anymore
+                            Options.LoginStateCache.TryRemove(stateId);
+
+                            // create the authentication ticket
+                            return new AuthenticationTicket(identity, properties);
+                        }
                     }
                 }
 
@@ -175,7 +180,7 @@
                     // Prevent further processing by the owin pipeline.
                     return true;
                 }
-                else if (Response.Headers.ContainsKey("WWW-Authenticate"))
+                if (Response.Headers.ContainsKey("WWW-Authenticate"))
                 {
                     return true;
                 }
@@ -186,15 +191,15 @@
         }
 
         #region Helpers
+        private static readonly MD5 _md5 = MD5.Create();
         public string CalculateMD5Hash(string input)
         {
             // step 1, calculate MD5 hash from input
-            var md5 = System.Security.Cryptography.MD5.Create();
-            byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
-            byte[] hash = md5.ComputeHash(inputBytes);
+            byte[] inputBytes = Encoding.ASCII.GetBytes(input);
+            byte[] hash = _md5.ComputeHash(inputBytes);
 
             // step 2, convert byte array to hex string
-            var sb = new StringBuilder();
+            var sb = new StringBuilder(hash.Length * 2);
             for (int i = 0; i < hash.Length; i++)
             {
                 sb.Append(hash[i].ToString("X2"));
