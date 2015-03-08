@@ -8,6 +8,9 @@ namespace Pysco68.Owin.Authentication.Ntlm.Tests
 {
     class WebApplication
     {
+        /// <summary>
+        /// Note: static is okay here. DI would be significantly cruftier...
+        /// </summary>
         public static readonly NtlmAuthenticationOptions Options = new NtlmAuthenticationOptions();
 
         public void Configuration(IAppBuilder app)

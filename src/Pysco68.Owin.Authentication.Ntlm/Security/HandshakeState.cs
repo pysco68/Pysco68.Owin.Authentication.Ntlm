@@ -9,7 +9,7 @@
     /// <summary>
     /// A windows authentication session
     /// </summary>
-    class HandshakeState
+    class HandshakeState : IDisposable
     {
         public HandshakeState()
         {
@@ -159,6 +159,13 @@
             }
 
             return true;
+        }
+
+        public void Dispose()
+        {
+            this.Context.Reset();
+            this.Credentials.Reset();
+            this.WindowsIdentity.Dispose();
         }
     }
 }

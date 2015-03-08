@@ -12,7 +12,7 @@
     /// </summary>
     class StateCache
     {
-        #region fields        
+        #region fields
         private MemoryCache Cache;
 
         /// <summary>
@@ -96,7 +96,14 @@
             var policy = new CacheItemPolicy()
             {
                 Priority = CacheItemPriority.Default,
-                AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(minutes)
+                AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(minutes),
+                RemovedCallback = (item) => 
+                {  
+                    // dispose cached item at removal
+                    var asDisposable = item.CacheItem as IDisposable;
+                    if (asDisposable != null)
+                        asDisposable.Dispose();
+                }
             };
             return policy;
         }
