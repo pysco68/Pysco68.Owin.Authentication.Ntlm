@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>Pysco68.Owin.Authentication.Ntlm</id>
-        <version>1.0.1</version>
+        <version>1.0.2</version>
         <authors>Yannic "Pysco68" Staudt</authors>
         <owners>Pysco68</owners>
         <licenseUrl>https://github.com/pysco68/Pysco68.Owin.Authentication.Ntlm/raw/master/LICENCE</licenseUrl>
@@ -11,8 +11,12 @@
         <description>An NTLM authentication middleware for OWIN that enables you to use NTLM (Windows) Authentication independently of IIS or HTTPListener.
 
 Furthermore it integrates with ASP.NET Identity 2.0 and allows you to have NTLM as yet another mean of authentication toghether with true local application accounts!</description>
-        <releaseNotes>v1.0.1:
-Fixed issue with callback path not being recognized when the OWIN pipeline is Mapped to a sub-path (app.Map("/somePath", af =&gt;...))
+        <releaseNotes>
+          v1.0.2:
+          Added a filtering callback (NtlmAuthenticationOptions.Filter) to the options to have more control on who passes the authentication based on request origin and windows identity
+
+          v1.0.1:
+          Fixed issue with callback path not being recognized when the OWIN pipeline is Mapped to a sub-path (app.Map("/somePath", af =&gt;...))
 
 v1.0.0:
 Initial release</releaseNotes>

@@ -8,6 +8,11 @@ namespace Pysco68.Owin.Authentication.Ntlm.Tests
 {
     class WebApplication
     {
+        /// <summary>
+        /// Note: static is okay here. DI would be significantly cruftier...
+        /// </summary>
+        public static readonly NtlmAuthenticationOptions Options = new NtlmAuthenticationOptions();
+
         public void Configuration(IAppBuilder app)
         {
             // use default sign in with application cookies
@@ -32,7 +37,7 @@ namespace Pysco68.Owin.Authentication.Ntlm.Tests
             });
 
             // Enable NTLM authentication
-            app.UseNtlmAuthentication();
+            app.UseNtlmAuthentication(Options);
 
             // configure web api
             var config = new HttpConfiguration();

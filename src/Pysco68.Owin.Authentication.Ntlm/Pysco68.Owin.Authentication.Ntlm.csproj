@@ -77,7 +77,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Pysco68.Owin.Authentication.Ntlm.1.0.1.nuspec" />
+    <None Include="Pysco68.Owin.Authentication.Ntlm.nuspec" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

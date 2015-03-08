@@ -1,4 +1,6 @@
-﻿namespace Pysco68.Owin.Authentication.Ntlm
+﻿using System.Security.Principal;
+
+namespace Pysco68.Owin.Authentication.Ntlm
 {
     using System;
     using System.Collections.Generic;
@@ -48,6 +50,15 @@
         /// defaults to "/authentication/ntlm-signin"
         /// </summary>
         public PathString CallbackPath { get; set; }
+
+        /// <summary>
+        /// If this is set, it must return true to authenticate the user.
+        /// It can be used to filter out users according to separate criteria.
+        /// </summary>
+        /// <remarks>
+        /// Note that the Windows identity will be disposed shortly after this function has returned
+        /// </remarks>
+        public Func<WindowsIdentity, IOwinRequest, bool> Filter { get; set; }
 
         /// <summary>
         /// Creates an instance of Ntlm authentication options with default values.

@@ -93,10 +93,24 @@ app.UseCookieAuthentication(new CookieAuthenticationOptions()
 
 So make sure to check the above if you get strange redirects or redirect loops!
 
+If you need to have detailled control about who logs into your application (say based on windows domain groups) you can pass a filter expression to the middleware:
+```C#
+// Enable NTLM authentication
+app.UseNtlmAuthentication(new NtlmAuthenticationOptions() 
+{
+	Filter = (windowsIdentity, request) => 
+		windowsIdentity.UserName.StartsWith("FOOBAR\\")	// user belongs to the domain "FOOBAR"
+});        
+```
+
 ## Kudos
 
 Big thanks to Alexey Shytikov (@shytikov) and his Nancy.Authentication.Ntlm (https://github.com/toolchain/Nancy.Authentication.Ntlm) implementation of Ntlm for Nancy. 
 It was a huge help!
+
+Thanks to the contributors:
+
+* Brannon King (@BrannonKing) for the `Filter` callback
 
 ## Help / Contribution
 
