@@ -93,6 +93,8 @@ app.UseCookieAuthentication(new CookieAuthenticationOptions()
 
 So make sure to check the above if you get strange redirects or redirect loops!
 
+> Note: you can provide a path to the `IOwinRequest.IsNtlmAuthenticationCallback(PathString redirectPath)` extension method. This is useful if the effective callback path is different from `NtlmAuthenticationOptions.DefaultRedirectPath` (for example if you specified something different in the setup or if you use the middleware in a virtual directory: see #7)
+
 If you need to have detailled control about who logs into your application (say based on windows domain groups) you can pass a filter expression to the middleware:
 ```C#
 // Enable NTLM authentication
