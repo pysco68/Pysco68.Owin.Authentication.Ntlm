@@ -1,6 +1,4 @@
-﻿using System.Security.Principal;
-
-namespace Pysco68.Owin.Authentication.Ntlm
+﻿namespace Pysco68.Owin.Authentication.Ntlm
 {
     using System;
     using System.Collections.Generic;
@@ -10,6 +8,8 @@ namespace Pysco68.Owin.Authentication.Ntlm
     using Microsoft.Owin;
     using Microsoft.Owin.Security;
     using Pysco68.Owin.Authentication.Ntlm.Security;
+    using System.Security.Claims;
+    using System.Security.Principal;
 
     public class NtlmAuthenticationOptions : AuthenticationOptions
     {
@@ -59,6 +59,11 @@ namespace Pysco68.Owin.Authentication.Ntlm
         /// Note that the Windows identity will be disposed shortly after this function has returned
         /// </remarks>
         public Func<WindowsIdentity, IOwinRequest, bool> Filter { get; set; }
+
+        /// <summary>
+        /// This is fired when a valid WindowsIdentity has been found, and must return a ClaimsIdentity
+        /// </summary>
+        public Func<WindowsIdentity, NtlmAuthenticationOptions, ClaimsIdentity> OnCreateIdentity { get; set; }
 
         /// <summary>
         /// Creates an instance of Ntlm authentication options with default values.

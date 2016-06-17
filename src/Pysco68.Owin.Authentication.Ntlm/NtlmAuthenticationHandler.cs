@@ -82,22 +82,32 @@ namespace Pysco68.Owin.Authentication.Ntlm
 
                         if (Options.Filter == null || Options.Filter.Invoke(state.WindowsIdentity, Request))
                         {
-                            // If the name is something like DOMAIN\username then
-                            // grab the name part (and what if it looks like username@domain?)
-                            var parts = state.WindowsIdentity.Name.Split(new[] {'\\'}, 2);
-                            string shortName = parts.Length == 1 ? parts[0] : parts[parts.Length - 1];
 
-                            // we need to create a new identity using the sign in type that 
-                            // the cookie authentication is listening for
-                            var identity = new ClaimsIdentity(Options.SignInAsAuthenticationType);
-
-                            identity.AddClaims(new[]
+                            ClaimsIdentity identity;
+                            if (Options.OnCreateIdentity == null)
                             {
-                                new Claim(ClaimTypes.NameIdentifier, state.WindowsIdentity.User.Value, null, Options.AuthenticationType),
-                                new Claim(ClaimTypes.Name, shortName),
-                                new Claim(ClaimTypes.Sid, state.WindowsIdentity.User.Value),
-                                new Claim(ClaimTypes.AuthenticationMethod, NtlmAuthenticationDefaults.AuthenticationType)
-                            });
+                                // If the name is something like DOMAIN\username then
+                                // grab the name part (and what if it looks like username@domain?)
+                                var parts = state.WindowsIdentity.Name.Split(new[] { '\\' }, 2);
+                                string shortName = parts.Length == 1 ? parts[0] : parts[parts.Length - 1];
+
+                                // we need to create a new identity using the sign in type that 
+                                // the cookie authentication is listening for
+                                identity = new ClaimsIdentity(Options.SignInAsAuthenticationType);
+
+                                identity.AddClaims(new[]
+                                {
+                                    new Claim(ClaimTypes.NameIdentifier, state.WindowsIdentity.User.Value, null,
+                                        Options.AuthenticationType),
+                                    new Claim(ClaimTypes.Name, shortName),
+                                    new Claim(ClaimTypes.Sid, state.WindowsIdentity.User.Value)
+                                });
+                            }
+                            else
+                            {
+                                identity = Options.OnCreateIdentity(state.WindowsIdentity, Options);
+                            }
+                            identity.AddClaim(new Claim(ClaimTypes.AuthenticationMethod, NtlmAuthenticationDefaults.AuthenticationType));
 
                             // We don't need that state anymore
                             Options.LoginStateCache.TryRemove(stateId);
