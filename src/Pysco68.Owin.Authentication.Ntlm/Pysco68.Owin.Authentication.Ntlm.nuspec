@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>Pysco68.Owin.Authentication.Ntlm</id>
-        <version>1.0.2</version>
+        <version>1.0.3</version>
         <authors>Yannic "Pysco68" Staudt</authors>
         <owners>Pysco68</owners>
         <licenseUrl>https://github.com/pysco68/Pysco68.Owin.Authentication.Ntlm/raw/master/LICENCE</licenseUrl>
@@ -12,6 +12,9 @@
 
 Furthermore it integrates with ASP.NET Identity 2.0 and allows you to have NTLM as yet another mean of authentication toghether with true local application accounts!</description>
         <releaseNotes>
+          v1.0.3:
+          Added a callback to offload the ClaimsIdentity creation to the application if there's need for customization
+            
           v1.0.2:
           Added a filtering callback (NtlmAuthenticationOptions.Filter) to the options to have more control on who passes the authentication based on request origin and windows identity
 
@@ -20,7 +23,7 @@ Furthermore it integrates with ASP.NET Identity 2.0 and allows you to have NTLM 
 
 v1.0.0:
 Initial release</releaseNotes>
-        <copyright>2014 Yannic Staudt</copyright>
+        <copyright>2014 - 2016 Yannic Staudt</copyright>
         <tags>NTLM OWIN Identity Windows authentication ASP.NET</tags>
         <dependencies>
             <group targetFramework=".NETFramework4.5">
@@ -35,5 +38,6 @@ Initial release</releaseNotes>
     <files>
         <file src="bin\Release\Pysco68.Owin.Authentication.Ntlm.dll" target="lib\net45\Pysco68.Owin.Authentication.Ntlm.dll" />
         <file src="bin\Release\Pysco68.Owin.Authentication.Ntlm.pdb" target="lib\net45\Pysco68.Owin.Authentication.Ntlm.pdb" />
+        <file src="bin\Release\Pysco68.Owin.Authentication.Ntlm.xml" target="lib\net45\Pysco68.Owin.Authentication.Ntlm.xml" />
     </files>
 </package>

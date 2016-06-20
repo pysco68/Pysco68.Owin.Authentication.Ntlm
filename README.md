@@ -105,6 +105,37 @@ app.UseNtlmAuthentication(new NtlmAuthenticationOptions()
 });        
 ```
 
+Additionally you may want to controll the creation of the authentication identity being created when the user is authenticating. You can provide your own callback for `OnCreateIdentity` which takes the user's windows identity and the authentication options an must provide a `ClaimsIdentity`:
+
+```C#
+// Enable NTLM authentication
+app.UseNtlmAuthentication(new NtlmAuthenticationOptions() 
+{
+	OnCreateIdentity  = (windowsIdentity, options) => 
+	{
+		// If the name is something like DOMAIN\username then
+  		// grab the name part (and what if it looks like username@domain?)
+        var parts = state.WindowsIdentity.Name.Split(new[] { '\\' }, 2);
+        string shortName = parts.Length == 1 ? parts[0] : parts[parts.Length - 1];
+
+        // we need to create a new identity using the sign in type that 
+        // the cookie authentication is listening for
+        var identity = new ClaimsIdentity(Options.SignInAsAuthenticationType);
+
+        identity.AddClaims(new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, state.WindowsIdentity.User.Value, null,
+                Options.AuthenticationType),
+            new Claim(ClaimTypes.Name, shortName),
+            new Claim(ClaimTypes.Sid, state.WindowsIdentity.User.Value)
+        });                              
+
+
+		return identity;
+	}
+});        
+```
+
 ## Kudos
 
 Big thanks to Alexey Shytikov (@shytikov) and his Nancy.Authentication.Ntlm (https://github.com/toolchain/Nancy.Authentication.Ntlm) implementation of Ntlm for Nancy. 
@@ -113,6 +144,7 @@ It was a huge help!
 Thanks to the contributors:
 
 * Brannon King (@BrannonKing) for the `Filter` callback
+* Martin Thwaites (@martinjt) for the `OnCreateIdentity` callback
 
 ## Help / Contribution
 

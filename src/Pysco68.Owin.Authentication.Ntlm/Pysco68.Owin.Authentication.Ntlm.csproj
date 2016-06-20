@@ -32,6 +32,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Release\Pysco68.Owin.Authentication.Ntlm.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
