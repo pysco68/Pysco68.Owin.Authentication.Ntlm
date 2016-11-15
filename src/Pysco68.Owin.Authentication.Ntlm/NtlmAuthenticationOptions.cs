@@ -62,8 +62,12 @@
 
         /// <summary>
         /// This is fired when a valid WindowsIdentity has been found, and must return a ClaimsIdentity
+        /// 
+        /// parameter 1: the newly created windows identiy
+        /// parameter 2: the options object of the middleware
+        /// parameter 3: the current request
         /// </summary>
-        public Func<WindowsIdentity, NtlmAuthenticationOptions, ClaimsIdentity> OnCreateIdentity { get; set; }
+        public Func<WindowsIdentity, NtlmAuthenticationOptions, IOwinRequest, ClaimsIdentity> OnCreateIdentity { get; set; }
 
         /// <summary>
         /// Creates an instance of Ntlm authentication options with default values.

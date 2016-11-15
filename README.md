@@ -111,7 +111,7 @@ Additionally you may want to controll the creation of the authentication identit
 // Enable NTLM authentication
 app.UseNtlmAuthentication(new NtlmAuthenticationOptions() 
 {
-	OnCreateIdentity  = (windowsIdentity, options) => 
+	OnCreateIdentity  = (windowsIdentity, options, request) => 
 	{
 		// If the name is something like DOMAIN\username then
   		// grab the name part (and what if it looks like username@domain?)

@@ -105,7 +105,7 @@ namespace Pysco68.Owin.Authentication.Ntlm
                             }
                             else
                             {
-                                identity = Options.OnCreateIdentity(state.WindowsIdentity, Options);
+                                identity = Options.OnCreateIdentity(state.WindowsIdentity, Options, Request);
                             }
                             identity.AddClaim(new Claim(ClaimTypes.AuthenticationMethod, NtlmAuthenticationDefaults.AuthenticationType));
 
