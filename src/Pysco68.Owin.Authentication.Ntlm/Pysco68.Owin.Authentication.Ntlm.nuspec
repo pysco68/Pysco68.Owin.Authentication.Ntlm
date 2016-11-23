@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>Pysco68.Owin.Authentication.Ntlm</id>
-        <version>1.0.4</version>
+        <version>1.0.5</version>
         <authors>Yannic "Pysco68" Staudt</authors>
         <owners>Pysco68</owners>
         <licenseUrl>https://github.com/pysco68/Pysco68.Owin.Authentication.Ntlm/raw/master/LICENCE</licenseUrl>
@@ -12,6 +12,9 @@
 
 Furthermore it integrates with ASP.NET Identity 2.0 and allows you to have NTLM as yet another mean of authentication toghether with true local application accounts!</description>
         <releaseNotes>
+          v1.0.5:
+          Removed unnecessary nuget references to Owin.Extensions and Owin.Types
+
           v1.0.4:
           Added request parameter to OnCreateIdentity() callback for use cases where claims information is available in the IOwinRequest (as for the Filter() callback function)
 
@@ -33,8 +36,6 @@ Initial release</releaseNotes>
                 <dependency id="Microsoft.Owin" version="3.0.0" />
                 <dependency id="Microsoft.Owin.Security" version="3.0.0" />
                 <dependency id="Owin" version="1.0" />
-                <dependency id="Owin.Extensions" version="0.8.5" />
-                <dependency id="Owin.Types" version="0.8.5" />
             </group>
         </dependencies>
     </metadata>
